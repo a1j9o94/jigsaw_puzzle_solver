@@ -14,6 +14,8 @@ class Edge:
 
 class PuzzlePiece:
     def __init__(self, edges: List[Edge], piece_id: int):
+        if len(edges) != 4:
+            raise ValueError("Each puzzle piece must have exactly 4 edges.")
         self.edges = edges
         self.id = piece_id
 

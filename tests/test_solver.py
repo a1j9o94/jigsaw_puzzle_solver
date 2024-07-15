@@ -57,7 +57,7 @@ def test_edge_matching():
     
     # Check if each piece has the correct number of connections
     for piece_id, connections in solver.graph.items():
-        assert 1 <= len(connections) <= 3, f"Each piece should have 1 to 3 connections, piece {piece_id} has {len(connections)}"
+        assert 2 <= len(connections) <= 4, f"Each piece should have 2 to 4 connections, piece {piece_id} has {len(connections)}"
 
 def test_solve_empty_puzzle():
     solver = PuzzleSolver([])
