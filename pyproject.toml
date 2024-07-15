@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "jigsaw-puzzle-solver"
+version = "0.1.0"
+description = ""
+authors = ["Adrian Obleton <obletonadrian@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+numpy = "^2.0.0"
+
+[tool.poetry.scripts]
+solve-puzzle = "jigsaw_puzzle_solver.main:main"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
