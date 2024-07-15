@@ -1,5 +1,7 @@
+# jigsaw_puzzle_solver/solver.py
+
 import numpy as np
-from typing import List, Tuple, Dict, Set
+from typing import List, Tuple, Set
 from collections import defaultdict
 
 class Edge:
@@ -31,6 +33,10 @@ class PuzzleSolver:
                             self.graph[other_piece.id][piece.id] = (other_edge_index, edge_index)
 
     def solve(self) -> List[Tuple[int, int, int]]:
+        # check for an empty graph
+        if len(self.graph) == 0:
+            return []
+        
         start_piece = self.pieces[0].id
         visited = set()
         solution = []
@@ -43,7 +49,7 @@ class PuzzleSolver:
         if len(visited) == len(self.pieces):
             return True
 
-        for neighbor, (edge, neighbor_edge) in self.graph[piece_id].items():
+        for neighbor, (edge, _) in self.graph[piece_id].items():
             if neighbor not in visited:
                 solution.append((piece_id, neighbor, edge))
                 if self._dfs(neighbor, visited, solution):
@@ -53,9 +59,7 @@ class PuzzleSolver:
         visited.remove(piece_id)
         return False
 
-# Example usage
 def create_sample_puzzle() -> List[PuzzlePiece]:
-    # This is a simplified example. In a real scenario, you'd process images to get these vectors.
     pieces = [
         PuzzlePiece([Edge(np.array([1, 0])), Edge(np.array([0, 1])), Edge(np.array([-1, 0])), Edge(np.array([0, -1]))], 0),
         PuzzlePiece([Edge(np.array([-1, 0])), Edge(np.array([0, 1])), Edge(np.array([1, 0])), Edge(np.array([0, -1]))], 1),
@@ -64,14 +68,12 @@ def create_sample_puzzle() -> List[PuzzlePiece]:
     ]
     return pieces
 
+# main that creates a test puzzle and runs the solver
 def main():
-    puzzle_pieces = create_sample_puzzle()
-    solver = PuzzleSolver(puzzle_pieces)
+    pieces = create_sample_puzzle()
+    solver = PuzzleSolver(pieces)
     solution = solver.solve()
-    
-    print("Puzzle solution:")
-    for piece_id, neighbor_id, edge in solution:
-        print(f"Piece {piece_id} connects to Piece {neighbor_id} via edge {edge}")
+    print(solution)
 
 if __name__ == "__main__":
     main()

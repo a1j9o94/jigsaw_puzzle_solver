@@ -10,7 +10,10 @@ python = "^3.11"
 numpy = "^2.0.0"
 
 [tool.poetry.scripts]
-solve-puzzle = "jigsaw_puzzle_solver.main:main"
+solve-puzzle = "jigsaw_puzzle_solver.solver:main"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.2.2"
 
 [build-system]
 requires = ["poetry-core"]
