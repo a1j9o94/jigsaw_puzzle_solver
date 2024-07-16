@@ -1,16 +1,54 @@
 # jigsaw_puzzle_solver/solver.py
 
 import numpy as np
-from typing import List, Tuple, Set
+from typing import List, Tuple, Dict, Set
 from collections import defaultdict
+from shapely.geometry import LineString, Point
+from shapely.affinity import rotate
 
 class Edge:
-    def __init__(self, vector: np.ndarray):
-        self.vector = vector
-        self.length = np.linalg.norm(vector)
+    def __init__(self, points: List[Tuple[float, float]]):
+        """
+        Initialize an edge with a list of points defining its curve.
+        
+        :param points: List of (x, y) coordinates defining the edge curve.
+        """
+        if len(points) < 10:
+            raise ValueError("An edge should be defined by at least 10 points for accuracy")
+        self.contour = LineString(points)
+        self.length = self.contour.length
 
     def matches(self, other: 'Edge', tolerance: float = 0.01) -> bool:
-        return np.allclose(self.vector, -other.vector, atol=tolerance)
+        # Flip the other edge
+        flipped_contour = LineString(other.contour.coords[::-1])
+        
+        # Check if the contours are similar when aligned
+        return self.contour.hausdorff_distance(flipped_contour) < tolerance * self.length
+
+    def rotate(self, angle: float) -> 'Edge':
+        rotated_contour = rotate(self.contour, angle, origin='center')
+        return Edge(list(rotated_contour.coords))
+
+    @staticmethod
+    def create_puzzle_edge(num_points: int = 50) -> 'Edge':
+        """
+        Create a random puzzle-like edge.
+        
+        :param num_points: Number of points to use in defining the edge.
+        :return: An Edge object representing a puzzle-like curve.
+        """
+        x = np.linspace(0, 1, num_points)
+        y = np.zeros(num_points)
+        
+        # Create a random curve
+        for i in range(2, 5):  # Use 2-4 sine waves of different frequencies
+            y += np.sin(i * np.pi * x) * np.random.uniform(0.05, 0.15)
+        
+        # Ensure the edge starts and ends at y=0
+        y -= y[0]
+        y -= np.linspace(y[0], y[-1], num_points)
+        
+        return Edge(list(zip(x, y)))
 
 class PuzzlePiece:
     def __init__(self, edges: List[Edge], piece_id: int):
@@ -62,11 +100,12 @@ class PuzzleSolver:
         return False
 
 def create_sample_puzzle() -> List[PuzzlePiece]:
+    edges = [Edge.create_puzzle_edge() for _ in range(4)]
     pieces = [
-        PuzzlePiece([Edge(np.array([1, 0])), Edge(np.array([0, 1])), Edge(np.array([-1, 0])), Edge(np.array([0, -1]))], 0),
-        PuzzlePiece([Edge(np.array([-1, 0])), Edge(np.array([0, 1])), Edge(np.array([1, 0])), Edge(np.array([0, -1]))], 1),
-        PuzzlePiece([Edge(np.array([0, -1])), Edge(np.array([1, 0])), Edge(np.array([0, 1])), Edge(np.array([-1, 0]))], 2),
-        PuzzlePiece([Edge(np.array([0, -1])), Edge(np.array([-1, 0])), Edge(np.array([0, 1])), Edge(np.array([1, 0]))], 3),
+        PuzzlePiece([edges[0], edges[1].rotate(90), edges[2].rotate(180), edges[3].rotate(270)], 0),
+        PuzzlePiece([edges[2], edges[3].rotate(90), edges[0].rotate(180), edges[1].rotate(270)], 1),
+        PuzzlePiece([edges[1], edges[0].rotate(90), edges[3].rotate(180), edges[2].rotate(270)], 2),
+        PuzzlePiece([edges[3], edges[2].rotate(90), edges[1].rotate(180), edges[0].rotate(270)], 3),
     ]
     return pieces
 
